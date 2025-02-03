@@ -1,9 +1,9 @@
 import os
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from click.testing import CliRunner
 from service.common.cli_commands import db_create
-from service.routes import app  # Import the Flask app
+from service.routes import app
 
 class TestFlaskCLI(TestCase):
     """Test Flask CLI Commands"""
@@ -11,22 +11,14 @@ class TestFlaskCLI(TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
-    @patch('service.common.cli_commands.db')
-    def test_db_create(self, db_mock):
+    @patch('service.common.cli_commands.db.create_all')
+    def test_db_create(self, mock_create_all):
         """It should call the db-create command"""
-        # Create a fake db object with create_all() that returns None
-        fake_db = MagicMock()
-        fake_db.create_all.return_value = None
-        db_mock.return_value = fake_db
-
-        # Set FLASK_APP in the environment without clearing it
+        # When called, mock_create_all will do nothing (i.e. succeed)
         with patch.dict(os.environ, {"FLASK_APP": "service:app"}):
-            # Push an application context so the CLI command can use the Flask app
             with app.app_context():
-                # Use standalone_mode=False so that exceptions propagate
+                # Use standalone_mode=False so that exceptions are re‑raised
                 result = self.runner.invoke(db_create, [], standalone_mode=False)
-
-        # Optionally, you can print exception details for debugging:
-        # print("Exception:", result.exception)
-
+        # Ensure the command actually called db.create_all()
+        mock_create_all.assert_called_once()
         self.assertEqual(result.exit_code, 0)
