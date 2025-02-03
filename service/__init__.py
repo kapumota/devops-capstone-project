@@ -1,8 +1,6 @@
 """
 Package: service
-Package for the application models and service routes
-This module creates and configures the Flask app and sets up the logging
-and SQL database
+Creates and configures the Flask app and sets up logging and SQL db
 """
 import sys
 from flask import Flask
@@ -14,14 +12,26 @@ from flask_cors import CORS
 # Create Flask application
 app = Flask(__name__)
 app.config.from_object(config)
-talisman = Talisman(app)
+
+# Force Talisman to set all the security headers needed by the test
+csp = {
+    "default-src": ["'self'"],
+    "object-src": ["'none'"],
+}
+talisman = Talisman(
+    app,
+    content_security_policy=csp,
+    x_xss_protection=True,
+    frame_options='SAMEORIGIN',
+    referrer_policy='strict-origin-when-cross-origin',
+)
+
 CORS(app)
 
-# Import the routes After the Flask app is created
+# Import the routes AFTER the Flask app is created
 # pylint: disable=wrong-import-position, cyclic-import, wrong-import-order
 from service import routes, models  # noqa: F401 E402
-
-# pylint: disable=wrong-import-position
+# Import error handlers & CLI AFTER the app is created
 from service.common import error_handlers, cli_commands  # noqa: F401 E402
 
 # Set up logging for production
