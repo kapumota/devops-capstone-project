@@ -11,14 +11,13 @@ class TestFlaskCLI(TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
-    @patch('service.models.db.create_all')
-    def test_db_create(self, mock_create_all):
+    @patch('service.models.init_db')
+    def test_db_create(self, mock_init_db):
         """It should call the db-create command"""
-        # mock_create_all will now patch the method as used by db_create
-        with patch.dict(os.environ, {"FLASK_APP": "service:app"}):
+        # Provide a dummy DATABASE_URI to avoid configuration issues
+        with patch.dict(os.environ, {"FLASK_APP": "service:app", "DATABASE_URI": "sqlite://"}):
             with app.app_context():
-                # Using standalone_mode=False lets exceptions propagate
                 result = self.runner.invoke(db_create, [], standalone_mode=False)
-        # Check that create_all was indeed called
-        mock_create_all.assert_called_once()
+        # Assert that init_db was called exactly once with the Flask app
+        mock_init_db.assert_called_once_with(app)
         self.assertEqual(result.exit_code, 0)
