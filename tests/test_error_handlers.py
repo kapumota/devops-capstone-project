@@ -7,7 +7,7 @@ from unittest import TestCase
 from service.common import status
 from service.models import db, Account, init_db
 from service.routes import app
-#from service import talisman
+from service import talisman
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -32,7 +32,7 @@ class TestFlaskErrorHandler(TestCase):
         init_db(app)
         # Talisman will force all requests to your REST API to use the https:// protocol.
         # This is a good thing, except perhaps when testing (-> all tests will fail).
-        #talisman.force_https = False
+        talisman.force_https = False
 
     @classmethod
     def tearDownClass(cls):
