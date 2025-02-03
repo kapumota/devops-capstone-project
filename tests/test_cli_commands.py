@@ -11,7 +11,7 @@ class TestFlaskCLI(TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
-    @patch('service.models.init_db')
+    @patch('service.common.cli_commands.init_db')
     def test_db_create(self, mock_init_db):
         """It should call the db-create command"""
         # Provide a dummy DATABASE_URI to avoid configuration issues
